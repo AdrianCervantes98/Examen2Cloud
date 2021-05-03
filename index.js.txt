@@ -1,0 +1,53 @@
+const http = require('http'); // or https 
+
+const defaultOptions = {
+    host: 'example.com',
+    port: 80, // or 443 for https
+    headers: {
+        'Content-Type': 'application/json',
+        authorization: 'Basic YXBpa2V5OmdOR2w3Qk93emgzYWRNelNoWkNjc0kwN1Q4RVROY1I3OXdBOUFvZDBKbm5G'
+    }
+}
+
+const post = (path, payload) => new Promise((resolve, reject) => {
+    const options = { ...defaultOptions, path, method: 'POST' };
+    const req = http.request(options, res => {
+        let buffer = "";
+        res.on('data', chunk => buffer += chunk)
+        res.on('end', () => resolve(JSON.parse(buffer)))
+    });
+    req.on('error', e => reject(e.message));
+    req.write(JSON.stringify(payload));
+    req.end();
+})
+
+// Example usage
+exports.handler = async (event, context) => new Promise( async (resolve, reject) => {
+    
+    const token = await post("https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/e9142e10-384e-43f3-be07-1e2b7beaa67a/v1/analyze?version=2021-03-25", JSON.parse(event.body));
+    
+})
+
+/*
+var request = require("request");
+
+var options = { method: 'POST',
+  url: 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/e9142e10-384e-43f3-be07-1e2b7beaa67a/v1/analyze',
+  qs: { version: '2021-03-25' },
+  headers: 
+   { 'postman-token': 'fbc4751c-da47-25d4-c229-fb349972bfb8',
+     'cache-control': 'no-cache',
+     'content-type': 'application/json',
+     authorization: 'Basic YXBpa2V5OmdOR2w3Qk93emgzYWRNelNoWkNjc0kwN1Q4RVROY1I3OXdBOUFvZDBKbm5G' },
+  body: 
+   { text: 'I\'m very happy',
+     features: 
+      { entities: { emotion: true, sentiment: true, limit: 2 },
+        keywords: { emotion: true, sentiment: true, limit: 2 } } },
+  json: true };
+
+request(options, function (error, response, body) {
+  if (error) throw new Error(error);
+
+  console.log(body);
+});*/
